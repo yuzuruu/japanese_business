@@ -1,7 +1,9 @@
 ####################################################################
-# 2023年労務管理論関連Rコード
-# 2023年5月25日
+# Seniotiry payroll revisited
+# 5th. July 2023
 # Yuzuru Utsunomiya, Ph. D.
+# Faculty of Economics, Nagasaki University
+####################################################################
 # 
 # ----- read.library -----
 library(tidyverse)
