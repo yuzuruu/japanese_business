@@ -52,10 +52,10 @@ appID <- source("appID.r")$value
 # # read and reshape the read data
 # seniority_data_01 <-
 #   # read the data
-#   read_csv("./seniority_data/0003084623.csv") %>% 
-#   dplyr::mutate(across(where(is.character),  factor)) %>% 
-#   dplyr::select(-表章項目, -tab_code, -cat01_code, -cat02_code, -cat03_code, -cat04_code, -cat05_code, -cat06_code, -cat07_code, -time_code, -annotation) %>% 
-#   data.table::setnames(c("gender", "school", "age_class", "length_service", "industry", "size", "public_private", "year", "unit", "value")) %>% 
+#   read_csv("./seniority_data/0003084623.csv") %>%
+#   dplyr::mutate(across(where(is.character),  factor)) %>%
+#   dplyr::select(-tab_code, -cat01_code, -cat02_code, -cat03_code, -cat04_code, -cat05_code, -cat06_code, -cat07_code, -time_code, -annotation) %>%
+#   data.table::setnames(c("type", "gender", "school", "age_class", "length_service", "industry", "size", "public_private", "year", "unit", "value")) %>%
 #   dplyr::filter(
 #     size != "企業規模計（10人以上）"
 #     & length_service != "勤続年数計"
@@ -63,12 +63,12 @@ appID <- source("appID.r")$value
 #     & gender != "男女計"
 #     & school != "学歴計"
 #     & school != "不明"
-#     & age_class != "年齢計" 
+#     & age_class != "年齢計"
 #     & public_private != "民営＋公営"
 #     & unit == "千円"
-#   ) %>% 
-#   droplevels() %>% 
-#   # na.omit() %>% 
+#   ) %>%
+#   droplevels() %>%
+#   # na.omit() %>%
 #   dplyr::mutate(
 #     length_service = factor(length_service, levels = c("0年", "1～2年", "3～4年", "5～9年", "10～14年", "15～19年", "20～24年", "25～29年", "30年以上")),
 #     age_class = factor(age_class, levels = c("～19歳", "20～24歳", "25～29歳", "30～34歳", "35～39歳", "40～44歳", "45～49歳", "50～54歳", "55～59歳", "60～64歳", "65～69歳", "70歳～")),
@@ -76,6 +76,12 @@ appID <- source("appID.r")$value
 #   ) %>%
 #   # replace Japanese phrases into English ones
 #   dplyr::mutate(
+#     type = dplyr::case_when(
+#       type == "労働者数" ~ "labour_force",
+#       type == "年間賞与その他特別給与額" ~ "regular_payment",
+#       type == "所定内給与額" ~ "dividend",
+#       TRUE ~ "hoge"
+#     ),
 #     gender = dplyr::case_when(
 #       gender == "男" ~ "male",
 #       gender == "女" ~ "female",
@@ -90,17 +96,17 @@ appID <- source("appID.r")$value
 #       ),
 #     age_class = dplyr::case_when(
 #       age_class == "～19歳" ~ "under_19",
-#       age_class == "20～24歳" ~ "20-24", 
+#       age_class == "20～24歳" ~ "20-24",
 #       age_class == "25～29歳" ~ "25-29",
-#       age_class == "30～34歳" ~ "30-34", 
-#       age_class == "35～39歳" ~ "35-39", 
-#       age_class == "40～44歳" ~ "40-44", 
-#       age_class == "45～49歳" ~ "45-49", 
+#       age_class == "30～34歳" ~ "30-34",
+#       age_class == "35～39歳" ~ "35-39",
+#       age_class == "40～44歳" ~ "40-44",
+#       age_class == "45～49歳" ~ "45-49",
 #       age_class == "50～54歳" ~ "50-54",
-#       age_class == "55～59歳" ~ "55-59", 
-#       age_class == "60～64歳" ~ "60-64", 
-#       age_class == "65～69歳" ~ "65-69", 
-#       age_class == "70歳～" ~ "over_70", 
+#       age_class == "55～59歳" ~ "55-59",
+#       age_class == "60～64歳" ~ "60-64",
+#       age_class == "65～69歳" ~ "65-69",
+#       age_class == "70歳～" ~ "over_70",
 #       TRUE ~ "hoge"
 #     ),
 #     length_service = dplyr::case_when(
@@ -232,10 +238,10 @@ appID <- source("appID.r")$value
 #       industry == "Ｒ９５ その他のサービス業" ~ "MISCELLANEOUS SERVICES",
 #       TRUE ~ "hoge"
 #       )
-#     ) %>% 
-#   dplyr::select(-public_private, -unit) %>% 
-#   dplyr::filter(industry != "hoge") %>% 
-#   dplyr::mutate(across(where(is.character),  factor)) %>% 
+#     ) %>%
+#   dplyr::select(-public_private, -unit) %>%
+#   dplyr::filter(industry != "hoge") %>%
+#   dplyr::mutate(across(where(is.character),  factor)) %>%
 #   dplyr::mutate(
 #     age_class = factor(age_class, levels = c("20-24", "25-29", "30-34", "35-39", "40-44", "45-49", "50-54", "55-59", "60-64", "65-69", "over_70", "under_19")),
 #     length_service = factor(length_service, levels = c("0_years", "1-2", "3-4", "5-9", "10-14", "15-19", "20-24", "25-29", "over_30_years")),
@@ -246,6 +252,57 @@ appID <- source("appID.r")$value
 # readr::write_excel_csv(seniority_data_01, "seniority_data_01.csv")
 # # rds
 # readr::write_rds(seniority_data_01, "seniority_data_01.rds")
-# 
+# # 
 # ----- line.seniority.01 -----
+
+# read data
+seniority_data_01 <- readr::read_rds("seniority_data_01.rds")
+# plot
+seniority_data_01_line <- 
+  seniority_data_01 %>% 
+  dplyr::filter(industry %in% c("MINING AND QUARRYING OF STONE", "CONSTRUCTION", "MANUFACTURING", "ELECTRICITY, GAS, HEAT SUPPLY AND WATER", "INFORMATION AND COMMUNICATIONS", "TRANSPORT AND POSTAL SERVICES", "WHOLESALE AND RETAIL TRADE", "FINANCE AND INSURANCE", "REAL ESTATE AND GOODS RENTAL AND LEASING", "SCIENTIFIC RESEARCH, PROFESSIONAL AND TECHNICAL SERVICES", "ACCOMMODATIONS, EATING AND DRINKING SERVICES", "LIVING-RELATED AND PERSONAL SERVICES AND AMUSEMENT SERVICES",  "EDUCATION, LEARNING SUPPORT", "MEDICAL, HEALTH CARE AND WELFARE", "COMPOUND SERVICES", "SERVICES, N.E.C.")) %>% 
+  # na.omit() %>% 
+  group_by(industry, size, type) %>% 
+  nest() %>% 
+  dplyr::mutate(
+    seniority_line = purrr::map(
+      data,
+      ~
+        ggplot2::ggplot(
+          data = .,
+          aes(
+            x = length_service,
+            y = value,
+            color = age_class,
+            group = age_class
+          ) 
+        ) +
+        geom_line() +
+        geom_point() + 
+        scale_color_smoothrainbow(discrete = TRUE) +
+        labs(
+          title = industry, 
+          subtitle = paste0(type, " (",size,")"),
+          x = "Length of service (Unit: years)",
+          y = "Wage amount (Unit: 1,000JPY",
+          color = "Age class (Unit: years)"
+          ) + 
+        facet_wrap(~ gender + school + year, scales = "free_y") +
+        theme_classic() +
+        theme(
+          axis.text.x = element_text(angle =45, hjust = 1),
+          legend.position = "bottom",
+          strip.background = element_blank()
+          ) +
+        guides(color=guide_legend(nrow=1))
+    )
+  )
+# save the line plots
+pdf(
+  "seniority_data_01_line.pdf",
+  width = 20,
+  height = 20
+  )
+hoge$seniority_line
+dev.off()
 
